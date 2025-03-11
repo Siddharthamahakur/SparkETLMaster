@@ -7,16 +7,18 @@ from utils.logger import setup_logger
 # Set up logger
 logger = setup_logger("main")
 
-
 def run_pipeline(file_path: str):
-    """Executes the data pipeline: Read → Transform → Write."""
-    file_path = "data/sample.csv"
+    """
+    Runs the complete data pipeline: Read → Transform → Write.
+
+    :param file_path: Path to the input CSV file
+    """
     spark = None  # Initialize spark session variable
 
     try:
-        logger.info("🚀 Starting the Data Engineering Pipeline...")
+        logger.info("🚀 Starting Data Engineering Pipeline...")
 
-        # Initialize Spark Session
+        # Initialize Spark with optimized configurations
         spark = SparkSession.builder \
             .appName("SparkETL") \
             .config("spark.jars.packages", "mysql:mysql-connector-java:8.0.31") \
@@ -26,41 +28,37 @@ def run_pipeline(file_path: str):
         # Read CSV Data
         df = read_csv(spark, file_path)
 
-        # Check if DataFrame is empty
-        if df.isEmpty():
-            logger.warning(f"⚠️ No data found in {file_path}. Skipping pipeline execution.")
+        if df is None:
+            logger.error("❌ DataFrame is None. Skipping pipeline execution.")
             return
 
-        record_count = df.count()
-        logger.info(f"✅ Successfully read {record_count} records from {file_path}")
+        if df.rdd.isEmpty():
+            logger.warning(f"⚠️ No data found in {file_path}. Skipping execution.")
+            return
 
-        # Log schema for debugging
-        logger.debug(f"Data Schema:\n{df.printSchema()}")
+        logger.info(f"📊 Data loaded successfully: {df.count()} records.")
 
         # Transform Data
         df_transformed = transform_data(df)
 
-        # Validate transformation
         if df_transformed is None:
             logger.error("❌ Transformation failed. Exiting pipeline.")
             return
 
-        logger.info(f"✅ Data Transformation Successful. Records after transform: {df_transformed.count()}")
+        logger.info(f"✅ Data Transformation Complete: {df_transformed.count()} records.")
 
         # Write to MySQL
         db_handler = DatabaseHandler(db_url="localhost", db_user="root", db_password="root")
         db_handler.write_data(df_transformed)
-        logger.info("🎉 Pipeline Completed Successfully!")
+        logger.info("🎉 Pipeline Execution Successful!")
 
     except Exception as e:
         logger.error(f"🔥 Pipeline execution failed: {e}", exc_info=True)
 
     finally:
-        # Ensure Spark session is stopped to free resources
         if spark:
             spark.stop()
             logger.info("🛑 Spark Session Stopped.")
-
 
 if __name__ == "__main__":
     run_pipeline("data/sample.csv")
