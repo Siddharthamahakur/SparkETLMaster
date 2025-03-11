@@ -1,8 +1,10 @@
-import pytest
 import logging
 import time
-from ingestion.kafka_consumer import consume_kafka
+
+import pytest
 from kafka import KafkaConsumer, KafkaError
+
+from extractors.kafka_consumer import consume_kafka
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

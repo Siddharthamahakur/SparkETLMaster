@@ -1,14 +1,16 @@
+import json
 from datetime import datetime, timedelta
+
 from airflow.operators.python import PythonOperator
 from airflow.providers.apache.kafka.operators.consume import KafkaConsumeMessagesOperator
 from airflow.providers.apache.spark.operators.spark_submit import SparkSubmitOperator
 from airflow.providers.mysql.operators.mysql import MySqlOperator
+
 from airflow import DAG
-from ingestion.file_reader import read_csv
-from processing.transformer import transform_data
-from storage.db_writer import write_to_mysql
+from extractors.file_reader import read_csv
+from loads.db_writer import write_to_mysql
+from transformation.transformer import transform_data
 from utils.logger import setup_logger
-import json
 
 # Setup Logger
 logger = setup_logger("airflow_dag")

@@ -1,7 +1,9 @@
 import json
 import signal
 import sys
+
 from kafka import KafkaConsumer
+
 from utils.logger import setup_logger
 
 logger = setup_logger("kafka_consumer")
