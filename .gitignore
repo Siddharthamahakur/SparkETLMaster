@@ -2,3 +2,9 @@
 
 !/logs/
 !/tests/logs/
+/workflows/logs/db_writer.log
+/workflows/logs/etl_pipeline.log
+/tests/logs/file_reader.log
+/workflows/logs/file_reader.log
+/.idea/material_theme_project_new.xml
+/workflows/logs/transformer.log
