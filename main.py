@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 
+from ingestion.file_reader import read_csv
 from processing.transformer import transform_data
 from storage.db_writer import DatabaseHandler
 from utils.logger import setup_logger
@@ -20,7 +21,7 @@ def run_pipeline(file_path: str):
             .getOrCreate()
 
         # Read CSV Data using Spark
-        df = spark.read.csv(file_path, header=True, inferSchema=True)
+        df = read_csv(spark, file_path)
 
         # Check if DataFrame is empty
         if df.isEmpty():

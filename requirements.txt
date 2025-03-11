@@ -1,5 +1,5 @@
 pytest~=8.3.5
 pyspark~=3.5.5
 apache-airflow~=2.10.5
-sqlalchemy~=1.4.54
 kafka-python~=2.0.6
+numpy~=2.0.2
