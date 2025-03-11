@@ -28,6 +28,7 @@ def setup_spark_session(mysql_driver_path: str) -> SparkSession:
              .config("spark.sql.shuffle.partitions", "50")  # Optimized shuffle partitions
              .config("spark.sql.adaptive.enabled", "true")  # Enable Adaptive Query Execution (AQE)
              .getOrCreate())
+    spark.sparkContext.setLogLevel("WARN")  # Reduce logs to only errors
 
     # Log all Spark Configurations
     spark_conf = spark.sparkContext.getConf().getAll()
