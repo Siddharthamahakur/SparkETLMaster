@@ -1,0 +1,39 @@
+# Spark session configuration
+spark:
+  app_name: "Optimized ETL Pipeline"
+  adaptive_enabled: true
+  shuffle_partitions: 500
+  max_partition_bytes: "256MB"
+  executor_memory: "8g"
+  executor_cores: 4
+  driver_memory: "4g"
+  adaptive_query_execution: true
+  mysql_driver_path: "libs/mysql-connector-j-8.0.31.jar"
+
+dataset:
+  raw_data_path: "data/raw-data/*.json"
+  output_data_path: "data/processed-data/"
+  dimension_data_path: "data/dimensions/"
+
+# File paths
+file:
+  input_file: "data/sample.csv"
+  output_directory: "data/output"
+
+# MySQL database configuration
+database:
+  host: "localhost"
+  port: "3306"
+  name: "data_db"
+  user: "root"
+  password: "root"
+
+# ETL pipeline configuration
+etl:
+  chunk_size: 10000  # Chunk size for writing data
+  batch_log_interval: 50000  # Log progress every 50,000 records
+
+output_directory: "data/raw-data"
+num_records: 1000000
+num_partitions: 10
+batch_log_interval: 100000

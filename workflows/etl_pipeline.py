@@ -2,6 +2,7 @@ import os
 
 from pyspark.sql import SparkSession
 
+from config.config import load_config
 from extractors.file_reader import read_csv
 from loads.db_writer import DatabaseHandler
 from transformation.transformer import transform_data
@@ -22,21 +23,25 @@ def setup_spark_session(mysql_driver_path: str) -> SparkSession:
         logger.error(f"❌ MySQL JDBC Driver not found at: {mysql_driver_path}")
         raise FileNotFoundError(f"MySQL JDBC Driver missing at {mysql_driver_path}")
 
-    spark = (SparkSession.builder
-             .appName("OptimizedSparkETL")
-             .config("spark.jars", mysql_driver_path)
-             .config("spark.sql.shuffle.partitions", "50")  # Optimized shuffle partitions
-             .config("spark.sql.adaptive.enabled", "true")  # Enable Adaptive Query Execution (AQE)
-             .getOrCreate())
-    spark.sparkContext.setLogLevel("WARN")  # Reduce logs to only errors
+    try:
+        spark = (SparkSession.builder
+                 .appName(config["spark"]["app_name"])
+                 .config("spark.jars", mysql_driver_path)
+                 .config("spark.sql.shuffle.partitions", str(config["spark"]["shuffle_partitions"]))
+                 .config("spark.sql.adaptive.enabled", str(config["spark"]["adaptive_query_execution"]))
+                 .getOrCreate())
+        spark.sparkContext.setLogLevel("WARN")  # Reduce logs to only errors
+        logger.info("✅ Spark Session Initialized Successfully.")
 
-    # Log all Spark Configurations
-    spark_conf = spark.sparkContext.getConf().getAll()
-    logger.info("✅ Spark Session Initialized Successfully.")
-    for key, value in spark_conf:
-        logger.debug(f"⚙️ {key} = {value}")  # Detailed Spark Config Logs
+        # Log all Spark Configurations
+        spark_conf = spark.sparkContext.getConf().getAll()
+        for key, value in spark_conf:
+            logger.debug(f"⚙️ {key} = {value}")  # Detailed Spark Config Logs
 
-    return spark
+        return spark
+    except Exception as e:
+        logger.error(f"❌ Error initializing Spark Session: {e}")
+        raise
 
 
 def validate_file(file_path: str) -> str:
@@ -47,6 +52,7 @@ def validate_file(file_path: str) -> str:
     if not os.path.exists(abs_path):
         logger.error(f"❌ File not found: {abs_path}")
         raise FileNotFoundError(f"File not found: {abs_path}")
+    logger.info(f"📂 File validated: {abs_path}")
     return abs_path
 
 
@@ -69,9 +75,7 @@ def get_jdbc_url(db_host: str, db_port: str, db_name: str) -> str:
         "autoReconnect": "true"  # Ensures auto-reconnect in case of failure
     }
 
-    # Construct and return the formatted JDBC URL
     jdbc_url = f"jdbc:mysql://{db_host}:{db_port}/{db_name}?" + "&".join([f"{k}={v}" for k, v in params.items()])
-
     logger.info(f"🔗 Optimized JDBC URL Constructed: {jdbc_url}")
     return jdbc_url
 
@@ -85,16 +89,8 @@ def run(file_path: str, mysql_driver_path: str):
     """
     spark = None
 
-    # Database connection parameters
-    db_config = {
-        "host": "localhost",
-        "port": "3306",
-        "name": "data_db",
-        "user": "root",
-        "password": "root"
-    }
-
-    # Construct JDBC URL
+    # Load database connection parameters from config
+    db_config = config["database"]
     db_url = get_jdbc_url(db_config["host"], db_config["port"], db_config["name"])
 
     try:
@@ -102,7 +98,6 @@ def run(file_path: str, mysql_driver_path: str):
 
         # Validate File Path
         file_path = validate_file(file_path)
-        logger.info(f"📂 Validated File Path: {file_path}")
 
         # Initialize Spark Session
         spark = setup_spark_session(mysql_driver_path)
@@ -130,7 +125,6 @@ def run(file_path: str, mysql_driver_path: str):
         # Load: Write transformed data to MySQL
         db_handler = DatabaseHandler(db_url=db_url, db_user=db_config["user"], db_password=db_config["password"])
         db_handler.write_data(df_transformed)
-
         logger.info("🎉 Data Successfully Written to Database!")
 
     except FileNotFoundError as fe:
@@ -146,6 +140,16 @@ def run(file_path: str, mysql_driver_path: str):
 
 
 if __name__ == "__main__":
-    mysql_driver_path = os.path.abspath("libs/mysql-connector-j-8.0.31.jar")
-    file_path = os.path.abspath("data/sample.csv")
+    # Load Config
+    try:
+        config = load_config("config.yaml")
+        logger = setup_logger("pyspark_optimization")
+        logger.info("✅ Configuration loaded successfully.")
+    except FileNotFoundError:
+        logger.error("❌ Config file not found! Exiting...")
+        exit(1)
+
+    mysql_driver_path = os.path.abspath(config["spark"]["mysql_driver_path"])
+    file_path = os.path.abspath(config["file"]["input_file"])
+
     run(file_path, mysql_driver_path)
