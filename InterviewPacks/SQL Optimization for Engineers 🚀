@@ -1,0 +1,64 @@
+🔄 Before and After SQL Optimization
+❌ Unoptimized SQL Code
+SELECT * FROM Orders WHERE order_date >= '2024-01-01' AND order_status = 'Completed';
+Issues:
+
+🟥 **SELECT ***: Fetches unnecessary data, increasing query load.
+🟥 No Indexing: Can lead to full table scans.
+🟥 Static Date Filtering: Not flexible for automation.
+✅ Optimized SQL Code
+SELECT order_id, customer_id, total_amount
+FROM Orders
+WHERE order_date >= CURRENT_DATE - INTERVAL '90' DAY
+AND order_status = 'Completed';
+Improvements:
+🎯 Only Required Columns → Reduces data transfer.
+⚡ Uses Indexed Columns (order_date, order_status).
+🔄 Dynamic Date Filtering → Allows automated execution.
+🚀 Top SQL Performance Optimization Techniques
+1️⃣ Use Indexing for Faster Queries 📌
+
+CREATE INDEX idx_orders_date_status ON Orders(order_date, order_status);
+✅ Boosts filtering speed by allowing indexed lookups.
+
+2️⃣ Avoid SELECT * – Fetch Only Required Columns 🎯
+SELECT order_id, customer_id FROM Orders WHERE order_status = 'Completed';
+✅ Reduces memory usage and improves query performance.
+
+3️⃣ Use Joins Instead of Subqueries 🔄
+SELECT o.order_id, c.customer_name
+FROM Orders o
+JOIN Customers c ON o.customer_id = c.customer_id;
+✅ Joins are faster than correlated subqueries.
+
+4️⃣ Use Common Table Expressions (CTEs) for Readability & Performance 📊
+WITH recent_orders AS (
+    SELECT order_id, customer_id FROM Orders WHERE order_date >= CURRENT_DATE - INTERVAL '30' DAY
+)
+SELECT * FROM recent_orders;
+✅ Helps organize complex queries and improves performance.
+
+5️⃣ Optimize Duplicate Handling (De-Duplication) ✅
+DELETE FROM Customers
+WHERE id NOT IN (
+    SELECT MIN(id) FROM Customers GROUP BY email
+);
+✅ Efficient way to remove duplicates using GROUP BY.
+
+🔥 Latest SQL Interview FAQs & Advanced Questions
+Q1: How do you optimize SQL queries for big data tables?
+✅ Partitioning, Indexing, Proper Joins, and Avoiding Full Table Scans.
+
+Q2: How do you efficiently delete duplicate records?
+✅ Use ROW_NUMBER() OVER() or DISTINCT ON to identify and remove duplicates.
+
+Q3: Difference between INNER JOIN vs LEFT JOIN?
+INNER JOIN → Returns only matching records.
+LEFT JOIN → Returns all left table records, even if no match in right table.
+Q4: How do you implement SQL caching in Data Pipelines?
+✅ Use Materialized Views or Redis for frequently accessed data.
+
+💡 Final Thoughts
+✅ SQL Optimization = Faster Queries + Efficient Data Handling 🚀
+⚡ Master Indexing, Partitioning, and Query Structuring!
+

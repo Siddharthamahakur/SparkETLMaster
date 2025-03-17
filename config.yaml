@@ -2,38 +2,62 @@
 spark:
   app_name: "Optimized ETL Pipeline"
   adaptive_enabled: true
-  shuffle_partitions: 500
-  max_partition_bytes: "256MB"
+  shuffle_partitions: 200       # Optimized for parallelism
+  max_partition_bytes: "512MB"  # Increase partition size to reduce shuffle overhead
   executor_memory: "8g"
   executor_cores: 4
   driver_memory: "4g"
   adaptive_query_execution: true
   mysql_driver_path: "libs/mysql-connector-j-8.0.31.jar"
+  jars_packages: "io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.1"
 
+# Data paths
 dataset:
-  raw_data_path: "data/raw-data/*.json"
-  output_data_path: "data/processed-data/"
-  dimension_data_path: "data/dimensions/"
+  raw_data_path: "data/raw/*.json"         # Path for raw input data
+  processed_data_path: "data/processed/"   # Path for cleaned/transformed data
+  dimension_data_path: "data/dimensions/"  # Path for lookup tables
+  output_directory: "data/output/"         # Path for final outputs
 
-# File paths
+# File configuration
 file:
-  input_file: "data/sample.csv"
-  output_directory: "data/output"
+  input_file: "data/input/sample.csv"  # CSV input file location
 
 # MySQL database configuration
-database:
+mysql:
   host: "localhost"
   port: "3306"
-  name: "data_db"
+  name: "freelance"
   user: "root"
   password: "root"
+  url: "jdbc:mysql://localhost:3306/freelance?useSSL=false&serverTimezone=UTC"
+  table: "orders"
+  timestamp_column: "updated_at"       # Column for incremental loading
+  last_load_timestamp: "1970-01-01 00:00:00"  # Initial load timestamp
 
 # ETL pipeline configuration
 etl:
-  chunk_size: 10000  # Chunk size for writing data
-  batch_log_interval: 50000  # Log progress every 50,000 records
+  chunk_size: 50000         # Optimize for batch efficiency
+  batch_log_interval: 100000  # Log every 100,000 records for better monitoring
+  num_records: 1000000
+  num_partitions: 20        # Optimize for parallelism
 
-output_directory: "data/raw-data"
-num_records: 1000000
-num_partitions: 10
-batch_log_interval: 100000
+# API configuration for data extraction
+api:
+  url: "https://jsonplaceholder.typicode.com/posts"  # Sample API endpoint
+
+# Delta Lake paths for different processing stages
+delta:
+  bronze_path: "deltalake/bronze/"  # Raw data storage
+  silver_path: "deltalake/silver/"  # Processed data with cleaned structure
+  gold_path: "deltalake/gold/"      # Aggregated and optimized data
+
+# E-commerce sources for data extraction
+ecommerce_sites:
+  - "https://api.example1.com/products"
+  - "https://api.example2.com/catalog"
+
+# Logging settings (optional, can be managed within Python logging)
+logging:
+  level: "INFO"  # Set log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  format: "%(asctime)s - %(levelname)s - %(message)s"
+  log_file: "logs/etl_pipeline.log"

@@ -1,0 +1,36 @@
+❄️ General & Architecture
+🔹 1️⃣ What makes Snowflake different from traditional databases?
+🔹 2️⃣ Explain the multi-cluster architecture of Snowflake.
+🔹 3️⃣ How does Snowflake achieve high concurrency and elasticity?
+🔹 4️⃣ What are Snowflake's three main layers (Storage, Compute, Services)?
+
+🌩️ Data Migration & ETL
+🔹 5️⃣ What factors should be considered when migrating data from on-prem to Snowflake?
+🔹 6️⃣ How would you design an ETL pipeline using Snowflake's native features?
+🔹 7️⃣ What are the key best practices for batch and real-time ingestion?
+
+🏷️ Data Modeling & Performance
+🔹 8️⃣ Explain Slowly Changing Dimension Type 2 (SCD2) in Snowflake.
+🔹 9️⃣ What are the advantages of using Materialized Views?
+🔹 🔟 How does Snowflake handle JSON and semi-structured data efficiently?
+🔹 1️⃣1️⃣ How do Clustering Keys compare to Snowflake Optimized Storage (SOS)?
+🔹 1️⃣2️⃣ How do you optimize performance when dealing with large datasets?
+
+💰 Cost Optimization & Scaling
+🔹 1️⃣3️⃣ How would you reduce Snowflake costs effectively?
+🔹 1️⃣4️⃣ What are the key differences between Virtual Warehouses and Serverless features?
+🔹 1️⃣5️⃣ How do you optimize query performance in Snowflake?
+🔹 1️⃣6️⃣ How does scaling up vs. scaling out impact cost and performance?
+
+🔐 Security, Compliance & Governance
+🔹 1️⃣7️⃣ How does Snowflake handle Role-Based Access Control (RBAC)?
+🔹 1️⃣8️⃣ What are the key security features to ensure data protection?
+🔹 1️⃣9️⃣ Explain Time Travel & Fail-safe in Snowflake.
+
+🔄 Advanced Features & Integrations
+🔹 2️⃣0️⃣ What are the use cases of Zero-Copy Cloning?
+🔹 2️⃣1️⃣ How do you integrate Snowflake with Apache Kafka or AWS S3?
+🔹 2️⃣2️⃣ What are the limitations of Snowpipe for real-time ingestion?
+🔹 2️⃣3️⃣ How does Snowflake support Data Sharing & Cross-Cloud Replication?
+
+💡 Pro Tip: Master these questions to ace your Snowflake interview! 🚀❄️

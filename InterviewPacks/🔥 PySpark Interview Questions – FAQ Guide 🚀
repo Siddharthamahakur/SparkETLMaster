@@ -1,0 +1,159 @@
+# PySpark Interview Preparation Guide 🚀
+
+## ✅ General PySpark Questions
+
+1️⃣ What is PySpark, and how does it work?
+PySpark is the Python API for Apache Spark, enabling distributed data processing using RDDs (Resilient Distributed Datasets), DataFrames, and Datasets.
+
+2️⃣ Explain the architecture of PySpark.
+PySpark follows a master-slave architecture consisting of a **Driver**, **Cluster Manager** (YARN, Mesos, or Standalone), and **Executors** that run tasks in parallel.
+
+ 3️⃣ What are the differences between RDD, DataFrame, and Dataset?
+- **RDD**: Low-level abstraction, immutable, and resilient but lacks optimization features.
+- **DataFrame**: High-level abstraction with SQL-like functionalities and built-in optimization.
+- **Dataset**: Available in Scala/Java; combines the benefits of RDD and DataFrame with strong typing.
+
+ 4️⃣ How does Spark handle fault tolerance?
+Spark uses **lineage (DAG)** to recompute lost data and **replication** for resilience.
+
+ 5️⃣ What are the different types of transformations in PySpark?
+Transformations are **lazy** and categorized into:
+- **Narrow transformations** (e.g., `map()`, `filter()`, `flatMap()`)
+- **Wide transformations** (e.g., `groupBy()`, `reduceByKey()`, `join()`)
+
+ 6️⃣ What is the difference between narrow and wide transformations?
+- **Narrow**: Data is processed on a single partition (e.g., `map()`, `filter()`).
+- **Wide**: Requires shuffling data across partitions (e.g., `groupByKey()`, `reduceByKey()`).
+
+ 7️⃣ Explain the significance of the DAG (Directed Acyclic Graph) in Spark.
+The DAG represents a logical execution plan where transformations form a **lineage graph**, enabling efficient execution.
+
+ 8️⃣ What is the role of the driver and executor in PySpark?
+- **Driver**: Orchestrates the execution, creates the DAG, and distributes tasks.
+- **Executor**: Runs the actual computations on worker nodes.
+
+ 9️⃣ How does PySpark handle schema inference?
+Schema inference occurs when reading structured data like JSON, CSV, or Parquet, but **explicit schema definition is recommended for optimization**.
+
+ 🔟 What are the different types of joins in PySpark?
+- **Inner Join** (`df1.join(df2, "id", "inner")`)
+- **Left/Right Outer Join** (`df1.join(df2, "id", "left")`)
+- **Full Outer Join** (`df1.join(df2, "id", "outer")`)
+- **Cross Join** (`df1.crossJoin(df2)`)  
+
+
+## ⚡ Performance Optimization
+
+ 1️⃣6️⃣ How does cache() differ from persist() in PySpark?
+- **cache()** stores data in memory (default `MEMORY_ONLY`).
+- **persist()** allows specifying storage levels like `DISK_ONLY` or `MEMORY_AND_DISK`.
+
+ 1️⃣7️⃣ What is the significance of broadcast in Spark?
+Broadcasting small datasets reduces **shuffling overhead** in joins.
+
+ 1️⃣8️⃣ How do you optimize Spark jobs for performance?
+- Use **broadcast joins** for small datasets.
+- Optimize **partitioning** (avoid excessive shuffling).
+- Use **persist()** where necessary.
+- Avoid **collect()** on large datasets.
+
+ 1️⃣9️⃣ What are the benefits of partitioning in PySpark?
+Partitioning improves **parallelism** and **query performance**.
+
+ 2️⃣0️⃣ What is the difference between repartition() and coalesce()?
+- **repartition()** increases/decreases partitions with full data shuffle.
+- **coalesce()** reduces partitions without a full shuffle (preferred for downsizing).
+
+
+## 💻 PySpark Coding Challenges
+
+ 2️⃣8️⃣ Find the top 3 most occurring words in a dataset using PySpark.
+python
+from pyspark.sql.functions import explode, split, col, desc
+
+df = spark.read.text("file.txt")
+words_df = df.select(explode(split(col("value"), " ")).alias("word"))
+top_words = words_df.groupBy("word").count().orderBy(desc("count")).limit(3)
+top_words.show()
+
+
+ 2️⃣9️⃣ Write PySpark code to remove duplicate records in a DataFrame.
+python
+dedup_df = df.dropDuplicates()
+
+
+
+## 🗃️ PySpark SQL Questions
+
+ 4️⃣0️⃣ How do you create a temporary view in PySpark?
+python
+df.createOrReplaceTempView("employee_view")
+
+
+ 4️⃣1️⃣ Difference between df.select() and df.withColumn()?
+- `select()`: Returns a new DataFrame with specific columns.
+- `withColumn()`: Adds or modifies a column.
+
+ 4️⃣2️⃣ How do you write and execute SQL queries in PySpark?
+python
+result_df = spark.sql("SELECT * FROM employee_view WHERE salary > 50000")
+result_df.show()
+
+
+
+## ⏳ Streaming & Real-time Processing
+
+ 5️⃣2️⃣ What is Spark Streaming, and how does it work?
+Spark Streaming processes real-time data in **micro-batches**, leveraging **DStream (RDD-based) or Structured Streaming (DataFrame-based).**
+
+ 5️⃣6️⃣ How do you process Kafka streams using PySpark?
+python
+from pyspark.sql.types import StringType
+from pyspark.sql.functions import from_json, col
+
+df = (spark.readStream
+      .format("kafka")
+      .option("kafka.bootstrap.servers", "localhost:9092")
+      .option("subscribe", "topic_name")
+      .load())
+
+
+
+## 🔗 PySpark with Cloud & Big Data Ecosystem
+
+ 6️⃣1️⃣ How do you integrate PySpark with AWS S3, GCP, and Azure Data Lake?
+- **AWS S3**: `df.write.option("path", "s3://bucket_name/").parquet()`
+- **GCP**: `df.write.format("bigquery").option("table", "dataset.table").save()`
+- **Azure**: `df.write.option("path", "wasb://container@storage.blob.core.windows.net/").parquet()`
+
+ 6️⃣2️⃣ What are the benefits of using Delta Lake with PySpark?
+Delta Lake enables **ACID transactions**, **schema enforcement**, and **time-travel queries**.
+
+
+## 🔄 Before & After Code Optimization Example
+
+ ❌ Before Optimization:
+python
+df = spark.read.csv("data.csv", header=True, inferSchema=True)
+df = df.filter(df["salary"] > 50000)
+df.groupBy("department").avg("salary").show()
+
+
+ ✅ After Optimization:
+python
+from pyspark.sql.functions import col
+
+df = (spark.read.option("header", "true")
+             .option("inferSchema", "true")
+             .csv("data.csv")
+             .filter(col("salary") > 50000)
+             .groupBy("department")
+             .agg({"salary": "avg"}))
+
+df.show()
+
+🔹 **Improvements**: Used `col()`, eliminated unnecessary assignments, leveraged `agg()`.
+
+
+## 💡 Final Thoughts
+Mastering these 🔥 68 PySpark interview questions will boost your confidence and help you ace any Big Data interview! 🚀💪

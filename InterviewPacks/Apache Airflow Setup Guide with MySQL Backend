@@ -1,0 +1,227 @@
+1️⃣ Setup Python Virtual Environment
+Create and activate a virtual environment for Airflow.
+python3 -m venv venv
+source venv/bin/activate
+
+2️⃣ Install Required Dependencies
+Upgrade pip and install essential packages.
+pip install --upgrade pip setuptools wheel
+pip install pyspark apache-airflow mysqlclient \
+            apache-airflow-providers-mysql pymysql pandas
+
+3️⃣ Verify Installations
+Ensure essential packages are installed correctly.
+python -c "import pyspark; print(pyspark.__version__)"
+python -c "import pandas; print(pandas.__version__)"
+⚡ Airflow Setup & Configuration
+
+4️⃣ Airflow Initialization & Database Setup
+Check Airflow version and initialize/reset the database.
+airflow version
+airflow db reset -y
+airflow db init
+
+5️⃣ Start Airflow Services
+Launch Airflow Webserver & Scheduler in the background.
+airflow webserver --port 8080 &
+airflow scheduler &
+
+6️⃣ Manage Airflow Users
+Create a new admin user.
+airflow users create \
+  --username admin \
+  --password admin \
+  --firstname Admin \
+  --lastname User \
+  --role Admin \
+  --email admin@example.com
+🔧 Airflow Configuration & Monitoring
+
+7️⃣ List Configurations, Users, and Connections
+airflow config list
+airflow users list
+airflow connections list
+
+8️⃣ Add MySQL Connection
+airflow connections add my_conn_id \
+  --conn-type mysql \
+  --conn-host localhost \
+  --conn-login root \
+  --conn-password mypassword \
+  --conn-schema airflow
+
+9️⃣ Manage Airflow Variables & Plugins
+airflow variables set my_var value123
+airflow variables delete my_var
+airflow plugins list
+airflow pools list
+airflow providers list
+
+📌 Managing DAGs
+🔟 Trigger, Pause, Delete & Test DAGs
+airflow dags trigger my_dag
+airflow dags pause my_dag
+airflow dags unpause my_dag
+airflow dags delete my_dag --yes
+airflow dags test my_dag 2025-03-09
+
+1️⃣1️⃣ Backfill DAG Runs
+airflow dags backfill my_dag --start-date 2025-03-01 --end-date 2025-03-05 --parallelism 3
+airflow dags list-runs --state queued
+
+1️⃣2️⃣ Handling Failed Tasks & DAG Runs
+airflow tasks run my_dag my_task 2025-03-08
+airflow dags backfill my_dag --start-date 2025-03-08 --end-date 2025-03-08
+
+🚀 Airflow DAG Optimization
+1️⃣3️⃣ Optimize DAG Execution Settings
+Set execution parameters to improve performance.
+parallelism=32
+dag_concurrency=16
+
+1️⃣4️⃣ Triggering a DAG from Another DAG
+Use TriggerDagRunOperator to trigger a child DAG.
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+
+trigger_child_dag = TriggerDagRunOperator(
+  task_id="trigger_child_dag",
+  trigger_dag_id="child_dag",
+  wait_for_completion=True,
+  dag=dag
+)
+
+🛑 Stopping Airflow Services & Cleanup
+1️⃣5️⃣ Stop Airflow Services
+pkill -9 -f airflow
+pkill -f "airflow webserver"
+pkill -f "airflow scheduler"
+ps aux | grep airflow
+tail -f ~/airflow/logs/scheduler/latest/airflow-scheduler.log
+
+1️⃣6️⃣ Help & Troubleshooting
+airflow --help
+💾 MySQL Database Setup for Airflow Backend
+
+1️⃣7️⃣ Setup MySQL Database for Airflow
+mysql -u root -p <<EOF
+CREATE DATABASE airflow_db;
+CREATE USER 'root'@'localhost' IDENTIFIED BY 'root';
+GRANT ALL PRIVILEGES ON airflow_db.* TO 'root'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+EOF
+
+
+🔥 Apache Airflow Advanced Interview Questions & Answers (2025)
+
+🔹 Core Airflow Concepts
+1️⃣ What are the key components of Apache Airflow?
+✅ Scheduler: Orchestrates DAG runs and schedules tasks.
+✅ Executor: Executes tasks in a distributed environment.
+✅ Metadata Database: Stores DAG runs, task states, logs.
+✅ Web Server: UI for monitoring & managing DAGs.
+✅ Worker Nodes: Execute tasks in Celery/Kubernetes Executor.
+
+2️⃣ How does Airflow handle dependencies between tasks?
+✅ Upstream/Downstream Relationships: DAG tasks are defined with dependencies using >> and <<.
+✅ Trigger Rules: all_success, all_failed, one_success, etc., to control execution flow.
+✅ ExternalTaskSensor: Waits for a task in a different DAG to complete.
+✅ TriggerDagRunOperator: Dynamically triggers another DAG.
+Example:
+from airflow import DAG
+from airflow.operators.dummy import DummyOperator
+from airflow.operators.python import PythonOperator
+from datetime import datetime
+
+def my_task():
+    print("Task Executed")
+
+with DAG("my_dag", start_date=datetime(2024, 1, 1), schedule_interval="@daily") as dag:
+    start = DummyOperator(task_id="start")
+    task_1 = PythonOperator(task_id="task_1", python_callable=my_task)
+    end = DummyOperator(task_id="end")
+
+    start >> task_1 >> end  # Defining dependencies
+
+⚡ Airflow Performance Optimization
+3️⃣ How do you optimize DAG execution in a production environment?
+✅ Parallelism Tuning: Increase dag_concurrency and max_active_runs_per_dag.
+✅ Efficient Task Scheduling: Avoid scheduling too many DAGs at the same time.
+✅ Use Task Pooling: Assign resource-intensive tasks to different pools.
+✅ Reduce XCom Usage: Store large intermediate results in S3, GCS, or databases.
+✅ Event-Driven Workflows: Replace sensors with event-based triggers (e.g., AWS SQS, Kafka).
+
+4️⃣ How do you debug slow DAG execution?
+✅ Monitor Airflow Logs: tail -f ~/airflow/logs/scheduler/latest/airflow-scheduler.log
+✅ Analyze Task Execution Times: airflow tasks list my_dag
+✅ Optimize Query Performance: Ensure Airflow metadata DB is properly indexed.
+✅ Use Kubernetes Executor: Auto-scale tasks dynamically.
+✅ Check Scheduler Performance: airflow scheduler -D
+
+📌 Advanced Scenario-Based Challenges
+5️⃣ Scenario: Your DAGs are failing due to database deadlocks. How do you resolve this?
+✅ Optimize Database Settings: Increase sql_alchemy_pool_size in airflow.cfg.
+✅ Switch to a Dedicated Database Server: Use PostgreSQL/MySQL instead of SQLite.
+✅ Reduce DAG Metadata Load: Clear old DAG runs:
+airflow db clean --keep-last 100
+✅ Limit Parallel Runs: Reduce max_active_runs_per_dag to prevent DB overload.
+
+6️⃣ Scenario: A DAG runs successfully, but downstream tasks do not start. What do you check?
+✅ Check Trigger Rules: Ensure correct dependency rules (TriggerRule.ALL_SUCCESS, TriggerRule.ONE_SUCCESS).
+✅ Inspect Logs for Errors: airflow logs my_dag
+✅ Verify Task Status: airflow tasks list my_dag
+✅ Check for Stuck Sensors: Replace long-running Sensors with event-based triggers.
+
+7️⃣ Scenario: How do you dynamically generate DAGs based on an external API response?
+✅ Fetch Data from API: Use requests library to fetch DAG details dynamically.
+✅ Generate DAGs Programmatically: Store DAG metadata in an external database and generate them dynamically.
+✅ Use Python Modules for Dynamic DAGs:
+from airflow.models import DAG
+from airflow.operators.dummy import DummyOperator
+from datetime import datetime
+
+dag_list = ["dag_1", "dag_2", "dag_3"]
+
+for dag_id in dag_list:
+    with DAG(dag_id, start_date=datetime(2024, 1, 1), schedule_interval="@daily") as dag:
+        task = DummyOperator(task_id="start")
+8️⃣ Scenario: How do you ensure zero downtime when upgrading Apache Airflow?
+✅ Use a Blue-Green Deployment Approach: Run two Airflow instances and switch traffic.
+✅ Backup Metadata Database Before Upgrade:
+pg_dump airflow_db > backup.sql
+✅ Upgrade in a Staging Environment First: Test new Airflow versions before deploying.
+✅ Run Airflow in Docker/Kubernetes: Use rolling updates for minimal downtime.
+
+🔧 Airflow Security & Deployment
+9️⃣ How do you secure an Airflow deployment?
+✅ Enable RBAC Authentication: Use OAuth, LDAP, or Google Authentication.
+✅ Restrict Web UI Access: Use VPN, API Gateway, or IAM policies.
+✅ Store Secrets Securely: Use AWS Secrets Manager, HashiCorp Vault, or Airflow Variables.
+✅ Encrypt Metadata Database: Use SSL encryption for PostgreSQL/MySQL.
+
+🔟 How do you implement CI/CD for Airflow DAGs?
+✅ Use Git-Based Version Control: All DAGs should be committed to a repository.
+✅ Automate Testing with Pytest: Run DAG validation before deployment.
+✅ Deploy DAGs via Airflow REST API:
+curl -X POST "http://localhost:8080/api/v1/dags/my_dag/dagRuns" \
+-H "Content-Type: application/json" \
+-d '{"execution_date": "2025-03-17T00:00:00+00:00"}'
+✅ Use Helm Charts & Kubernetes for Deployment: Helm helps manage Airflow configurations.
+
+🔄 Before & After Optimization Example
+Before: ❌
+🚫 No version control for DAGs
+🚫 Sequential task execution slowing down workflows
+🚫 Inefficient use of sensors causing high resource utilization
+🚫 No monitoring of Airflow metadata database performance
+
+After: ✅
+✅ Implemented CI/CD for DAG management
+✅ Parallelized DAG tasks to improve execution speed
+✅ Replaced polling sensors with event-based triggers (Kafka/SQS)
+✅ Optimized metadata DB settings for faster task scheduling
+
+💡 Final Thoughts
+Mastering these Apache Airflow best practices, optimizations, and real-world scenario-based challenges will set you apart in senior-level Data Engineering interviews 🚀
+
+💬 Need help with a mock interview? Drop me a message! 🎯
