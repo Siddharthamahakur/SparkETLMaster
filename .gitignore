@@ -1,12 +1,22 @@
-!/.venv/
+# ✅ Ignore Virtual Environment
+/.venv/
 
-!/logs/
-!/tests/logs/
+# ✅ Ignore Log Files
+/logs/
+/tests/logs/
+/workflows/logs/
+
+# ✅ Ignore Specific Log Files
 /workflows/logs/db_writer.log
 /workflows/logs/etl_pipeline.log
-/tests/logs/file_reader.log
 /workflows/logs/file_reader.log
-/.idea/material_theme_project_new.xml
+/tests/logs/file_reader.log
 /workflows/logs/transformer.log
-!/workflows/logs/
+/workflows/logs/generate_large_dataset.log
+
+
+# ✅ Ignore IDE and Config Files
+/.idea/material_theme_project_new.xml
+
+# ✅ Include Source Files
 !/source/

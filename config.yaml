@@ -1,63 +1,63 @@
-# Spark session configuration
+# 🚀 Spark Session Configuration
 spark:
   app_name: "Optimized ETL Pipeline"
   adaptive_enabled: true
-  shuffle_partitions: 200       # Optimized for parallelism
-  max_partition_bytes: "512MB"  # Increase partition size to reduce shuffle overhead
+  shuffle_partitions: 200               # Optimized for parallelism
+  max_partition_bytes: "512MB"          # Reduce shuffle overhead by larger partitions
   executor_memory: "8g"
   executor_cores: 4
   driver_memory: "4g"
-  adaptive_query_execution: true
+  adaptive_query_execution: true        # Use AQE for dynamic optimizations
   mysql_driver_path: "libs/mysql-connector-j-8.0.31.jar"
   jars_packages: "io.delta:delta-core_2.12:2.4.0,org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.1"
 
-# Data paths
+# 📂 Data Paths
 dataset:
-  raw_data_path: "data/raw/*.json"         # Path for raw input data
-  processed_data_path: "data/processed/"   # Path for cleaned/transformed data
-  dimension_data_path: "data/dimensions/"  # Path for lookup tables
-  output_directory: "data/output/"         # Path for final outputs
+  raw_data_path: "data/raw/*.json"         # Raw input data
+  processed_data_path: "data/processed/"   # Cleaned/transformed data
+  dimension_data_path: "data/dimensions/"  # Lookup tables
+  output_directory: "data/output/"         # Final ETL output path
 
-# File configuration
+# 📑 File Configuration
 file:
-  input_file: "data/input/sample.csv"  # CSV input file location
+  input_file: "data/input/sample.csv"      # Input CSV file location
 
-# MySQL database configuration
+# 🛠️ MySQL Database Configuration
 mysql:
   host: "localhost"
   port: "3306"
   name: "freelance"
   user: "root"
-  password: "root"
+  password: "root"                         # 🔥 Consider using environment variables for security
   url: "jdbc:mysql://localhost:3306/freelance?useSSL=false&serverTimezone=UTC"
   table: "orders"
-  timestamp_column: "updated_at"       # Column for incremental loading
+  timestamp_column: "updated_at"           # Column for incremental loading
   last_load_timestamp: "1970-01-01 00:00:00"  # Initial load timestamp
 
-# ETL pipeline configuration
+# ⚙️ ETL Pipeline Configuration
 etl:
-  chunk_size: 50000         # Optimize for batch efficiency
-  batch_log_interval: 100000  # Log every 100,000 records for better monitoring
-  num_records: 1000000
-  num_partitions: 20        # Optimize for parallelism
+  chunk_size: 50000                         # Batch size for efficiency
+  batch_log_interval: 100000                # Log interval for monitoring
+  num_records: 1000000                      # Total records for processing
+  num_partitions: 20                        # Parallelism optimization
 
-# API configuration for data extraction
+# 🌐 API Configuration
 api:
-  url: "https://jsonplaceholder.typicode.com/posts"  # Sample API endpoint
+  url: "https://jsonplaceholder.typicode.com/posts"  # Sample endpoint for data extraction
 
-# Delta Lake paths for different processing stages
+# 🛢️ Delta Lake Paths
 delta:
-  bronze_path: "deltalake/bronze/"  # Raw data storage
-  silver_path: "deltalake/silver/"  # Processed data with cleaned structure
-  gold_path: "deltalake/gold/"      # Aggregated and optimized data
+  bronze_path: "deltalake/bronze/"          # Raw data storage
+  silver_path: "deltalake/silver/"          # Cleaned data storage
+  gold_path: "deltalake/gold/"              # Aggregated/optimized data
 
-# E-commerce sources for data extraction
+# 🌎 E-commerce Data Sources
 ecommerce_sites:
   - "https://api.example1.com/products"
   - "https://api.example2.com/catalog"
 
-# Logging settings (optional, can be managed within Python logging)
+# 📝 Logging Settings
 logging:
-  level: "INFO"  # Set log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  level: "INFO"                             # Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
   format: "%(asctime)s - %(levelname)s - %(message)s"
-  log_file: "logs/etl_pipeline.log"
+  log_file: "logs/etl_pipeline.log"         # Log output path
