@@ -1,5 +1,6 @@
 # ✅ Ignore Virtual Environment
 /.venv/
+!/airflow_venv/  # Include airflow venv
 
 # ✅ Ignore Log Files
 /logs/
@@ -14,9 +15,11 @@
 /workflows/logs/transformer.log
 /workflows/logs/generate_large_dataset.log
 
-
 # ✅ Ignore IDE and Config Files
+/.idea/
 /.idea/material_theme_project_new.xml
+/.vscode/
 
 # ✅ Include Source Files
 !/source/
+/.trunk/
